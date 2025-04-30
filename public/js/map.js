@@ -68,34 +68,15 @@ const firebaseConfig = {
               const marker = L.marker([lat, lng]).addTo(markersLayer);
               
               // Buat konten popup
-          // Fungsi untuk memformat nomor WhatsApp
-function formatWhatsAppNumber(whatsappNumber) {
-    if (!whatsappNumber) return '';
-    
-    // Jika sudah diawali dengan +, biarkan seperti itu
-    if (whatsappNumber.startsWith('+')) {
-      return whatsappNumber;
-    }
-    
-    // Jika diawali dengan 0, ganti dengan +62
-    if (whatsappNumber.startsWith('0')) {
-      return '+62' + whatsappNumber.substring(1);
-    }
-    
-    // Jika tidak ada keduanya, anggap sudah dalam format benar
-    return whatsappNumber;
-  }
-  
-  // Modifikasi bagian pembuatan popupContent dalam fetchCoursesData()
-  const popupContent = `
-    <div>
-      <h3 class="text-lg font-semibold mb-2">${course.fullName}</h3>
-      ${course.jlptLevel ? `<p><strong>JLPT:</strong> ${course.jlptLevel}</p>` : ''}
-      <p><strong>Pendidikan:</strong> ${course.education}</p>
-      <p><strong>Course Name :</strong> ${course.namecourses}</p>
-      <p><strong>Whatsapp :</strong> <a href="https://wa.me/${formatWhatsAppNumber(course.whatsapp)}?text=hallo+kak+saya+ingin+tanya+terkait+${course.namecourses}" target=_blank class="hover:text-blue-600">Chat Tutor</a> </p>
-    </div>
-  `;
+              const popupContent = `
+                <div>
+                  <h3 class="text-lg font-semibold mb-2">${course.fullName}</h3>
+                  ${course.jlptLevel ? `<p><strong>JLPT:</strong> ${course.jlptLevel}</p>` : ''}
+                  <p><strong>Pendidikan:</strong> ${course.education}</p>
+                  <p><strong>Course Name :</strong> ${course.namecourses}</p>
+                  <p><strong>Whatsapp :</strong> <a href="https://wa.me/62${course.whatsapp}?text=hallo+kak+saya+ingin+tanya+terkait+${course.namecourses}" target=_blank class="hover:text-blue-600">Chat Tutor</a> </p>
+                </div>
+              `;
               
               // Tambahkan popup ke marker
               marker.bindPopup(popupContent);
