@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Users</title>
+  <link rel="shortcut icon" href="https://i.pinimg.com/736x/f6/7e/ec/f67eec554efb57aad2e6b843ee95be8e.jpg" type="image/x-icon">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="min-h-screen">
+      <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between h-16">
+            <div class="flex items-center">
+              <h1 class="text-xl font-bold text-gray-900">Dashboard Pengguna</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+              <button id="addCourseBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                + Tambah Kursus
+              </button>
+              <button id="logoutButton" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+  
+      <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <!-- Informasi Pengguna -->
+        <div class="bg-white shadow rounded-lg p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Informasi Pengguna</h2>
+          <div id="userInfo" class="space-y-4">
+            <!-- Loading skeleton -->
+            <div class="animate-pulse flex space-x-4">
+              <div class="rounded-full bg-gray-300 h-16 w-16"></div>
+              <div class="flex-1 space-y-4 py-1">
+                <div class="h-4 bg-gray-300 rounded w-3/4"></div>
+                <div class="space-y-2">
+                  <div class="h-4 bg-gray-300 rounded"></div>
+                  <div class="h-4 bg-gray-300 rounded w-5/6"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Form Tambah Kursus (Awalnya tersembunyi) -->
+        <div id="courseFormContainer" class="hidden bg-white shadow rounded-lg p-6">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Form Tambah Kursus</h2>
+            <form id="courseForm" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                  <input type="text" name="fullName" required 
+                    class="mt-1 block w-full h-10 px-3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Pendidikan</label>
+                  <input type="text" name="education" required 
+                    class="mt-1 block w-full h-10 px-3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Nama Courses</label>
+                  <input type="text" name="namecourses" required 
+                    class="mt-1 block w-full h-10 px-3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">JLPT Level (Opsional)</label>
+                  <select name="jlptLevel" class="mt-1 block w-full h-10 px-3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Pilih Level</option>
+                    <option value="N5">N5</option>
+                    <option value="N4">N4</option>
+                    <option value="N3">N3</option>
+                    <option value="N2">N2</option>
+                    <option value="N1">N1</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">WhatsApp Aktif</label>
+                  <input type="tel" name="whatsapp" required 
+                    class="mt-1 block w-full h-10 px-3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Koordinat (Lat,Long pisahkan dengan koma)</label>
+                  <input type="text" name="coordinates" required placeholder="Contoh: -8.112,115.088"
+                    class="mt-1 block w-full h-10 px-3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+              </div>
+              <div class="flex justify-end space-x-3">
+                <button type="button" id="cancelFormBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                  Batal
+                </button>
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                  Simpan Kursus
+                </button>
+              </div>
+            </form>
+          </div>
+  
+        <!-- Tabel Daftar Kursus -->
+        <div class="bg-white shadow rounded-lg p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Daftar Kursus Anda</h2>
+          <div class="overflow-x-auto">
+            <table id="coursesTable" class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pendidikan</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name Courses</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">JLPT</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">WhatsApp</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="coursesTableBody" class="bg-white divide-y divide-gray-200">
+                <!-- Data kursus akan dimuat di sini -->
+                <tr>
+                  <td colspan="6" class="px-6 py-4 text-center text-gray-500">Memuat data...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  
+    <script src="/js/main.js"></script>
+  </body>
+</html>
